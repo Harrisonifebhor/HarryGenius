@@ -1,0 +1,108 @@
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>HarryGenius AI - Smart Reply Generator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@300;400;500;600;700&family=Syne:wght@400;500;600;700;800&family=Permanent+Marker&family=Rubik+Puddles&display=swap');
+      
+      :root {
+        --bg-color: #030014;
+        --text-color: #f1f5f9;
+        --card-bg: rgba(13, 4, 31, 0.7);
+        --border-color: rgba(139, 92, 246, 0.1);
+        --purple-gradient: linear-gradient(to bottom right, #2e1065, #4c1d95, #701a75);
+      }
+
+      .light {
+        --bg-color: #f8fafc;
+        --text-color: #1e293b;
+        --card-bg: rgba(255, 255, 255, 0.8);
+        --border-color: rgba(139, 92, 246, 0.2);
+      }
+
+      body {
+        font-family: 'Plus Jakarta Sans', sans-serif;
+        background-color: var(--bg-color);
+        color: var(--text-color);
+        transition: background-color 0.3s ease, color 0.3s ease;
+        overflow-x: hidden;
+      }
+      
+      .font-syne { font-family: 'Syne', sans-serif; }
+      .font-space { font-family: 'Space Grotesk', sans-serif; }
+      .font-graffiti { font-family: 'Permanent Marker', cursive; }
+      .font-drip { font-family: 'Rubik Puddles', system-ui; }
+
+      .custom-scrollbar::-webkit-scrollbar {
+        width: 6px;
+      }
+      .custom-scrollbar::-webkit-scrollbar-track {
+        background: transparent;
+      }
+      .custom-scrollbar::-webkit-scrollbar-thumb {
+        background: #4c1d95;
+        border-radius: 10px;
+      }
+      .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+        background: #701a75;
+      }
+      
+      .glass-card {
+        background: var(--card-bg);
+        backdrop-filter: blur(12px);
+        border: 1px solid var(--border-color);
+      }
+      
+      .purple-glow {
+        box-shadow: 0 0 40px -10px rgba(124, 58, 237, 0.3);
+      }
+      
+      @keyframes float {
+        0% { transform: translateY(0px); }
+        50% { transform: translateY(-10px); }
+        100% { transform: translateY(0px); }
+      }
+      .float-animation {
+        animation: float 6s ease-in-out infinite;
+      }
+      
+      .brand-glow {
+        text-shadow: 0 0 10px rgba(168, 85, 247, 0.5), 0 0 20px rgba(232, 121, 249, 0.3);
+      }
+
+      .btn-purple-gradient {
+        background: linear-gradient(135deg, #2e1065 0%, #4c1d95 50%, #701a75 100%);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+      }
+      .btn-purple-gradient:hover {
+        background: linear-gradient(135deg, #3b0764 0%, #5b21b6 50%, #86198f 100%);
+        box-shadow: 0 0 20px rgba(139, 92, 246, 0.4);
+      }
+    </style>
+    <!-- Define a global process object for browser compatibility -->
+    <script>
+      window.process = window.process || { env: { API_KEY: '' } };
+    </script>
+    <script type="importmap">
+    {
+      "imports": {
+        "uuid": "https://esm.sh/uuid@^13.0.0",
+        "react/": "https://esm.sh/react@^19.2.3/",
+        "react": "https://esm.sh/react@^19.2.3",
+        "@google/genai": "https://esm.sh/@google/genai@^1.37.0",
+        "react-dom/": "https://esm.sh/react-dom@^19.2.3/"
+      }
+    }
+    </script>
+  </head>
+  <body class="custom-scrollbar">
+    <div id="root"></div>
+    <!-- Explicitly load the entry point with extension for native module support -->
+    <script type="module" src="./index.tsx"></script>
+  </body>
+</html>
