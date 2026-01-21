@@ -1,10 +1,10 @@
 
 import { GoogleGenAI } from "@google/genai";
-import { Tone, ReplyLength, GenerationSettings } from "../types.ts";
+import { Tone, ReplyLength } from "../types.ts";
 
-// Initialize the API client once, safely handling missing keys for UI-only testing
-const apiKey = typeof process !== 'undefined' && process.env?.API_KEY ? process.env.API_KEY : '';
-const ai = apiKey ? new GoogleGenAI({ apiKey }) : null;
+// Initialize the API client directly. 
+// process.env.API_KEY is assumed to be pre-configured and valid in this context.
+const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
 
 export async function generateTwitterReply(
   tweetUrl: string,
@@ -12,10 +12,6 @@ export async function generateTwitterReply(
   length: ReplyLength,
   customPrompt?: string
 ): Promise<string> {
-  if (!ai) {
-    throw new Error("AI Client not initialized. API key missing.");
-  }
-
   const lengthPrompt = {
     [ReplyLength.SHORT]: "under 80 characters.",
     [ReplyLength.MEDIUM]: "1-2 punchy sentences.",
@@ -46,6 +42,6 @@ Rule: No hashtags, no quotes, no conversational filler like "Here is your reply"
     return (response.text || '').trim().replace(/^["']|["']$/g, '');
   } catch (error) {
     console.error("Gemini API Error:", error);
-    throw new Error("Generation failed. Likely a network hiccup.");
+    throw new Error("Generation failed. The architect encountered a data storm. Please check the post URL or try again later.");
   }
 }

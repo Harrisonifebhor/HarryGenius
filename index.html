@@ -52,10 +52,6 @@
       
       @keyframes spin { to { transform: rotate(360deg); } }
     </style>
-    <script>
-      // Fallback for process.env and fixing the blank page crash
-      window.process = { env: { API_KEY: '' } };
-    </script>
   <script type="importmap">
 {
   "imports": {
@@ -79,7 +75,6 @@
         </div>
       </div>
     </div>
-    <!-- Vite will handle the conversion of .tsx to browser-ready code -->
-    <script type="module" src="/index.tsx"></script>
+    <script type="module" src="./index.tsx"></script>
   </body>
 </html>
