@@ -52,6 +52,10 @@
       
       @keyframes spin { to { transform: rotate(360deg); } }
     </style>
+    <script>
+      // Ensure process.env exists to prevent bundle crashes before React mounts
+      window.process = window.process || { env: {} };
+    </script>
   <script type="importmap">
 {
   "imports": {
