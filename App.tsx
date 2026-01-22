@@ -4,7 +4,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { Tone, ReplyLength, TweetReply, GenerationSettings } from './types.ts';
 import SettingsPanel from './components/SettingsPanel.tsx';
 import TweetCard from './components/TweetCard.tsx';
-import { generateTwitterReply } from './services/geminiService.ts';
+import { generateTwitterReply, generateBatchTwitterReplies } from './services/geminiService.ts';
 
 const App: React.FC = () => {
   const [linksInput, setLinksInput] = useState('');
@@ -56,35 +56,65 @@ const App: React.FC = () => {
 
   const generateReply = useCallback(async (id: string) => {
     setReplies(prev => prev.map(r => r.id === id ? { ...r, status: 'generating', error: undefined } : r));
-
     try {
-      let targetUrl = '';
-      setReplies(prev => {
-        const found = prev.find(r => r.id === id);
-        if (found) targetUrl = found.originalUrl;
-        return prev;
-      });
+      const found = replies.find(r => r.id === id);
+      if (!found) return;
 
-      const result = await generateTwitterReply(targetUrl, settings.tone, settings.length, settings.customPrompt);
+      const result = await generateTwitterReply(found.originalUrl, settings.tone, settings.length, settings.customPrompt);
       setReplies(prev => prev.map(r => r.id === id ? { ...r, generatedText: result, status: 'completed' } : r));
     } catch (err: any) {
       setReplies(prev => prev.map(r => r.id === id ? { ...r, status: 'error', error: err.message } : r));
     }
-  }, [settings]);
+  }, [settings, replies]);
 
   const handleGenerateAll = async () => {
     if (isGeneratingAll) return;
     setIsGeneratingAll(true);
     
-    const pendingReplies = replies.filter(r => r.status !== 'completed' && r.status !== 'generating');
-    
+    const pending = replies.filter(r => r.status !== 'completed' && r.status !== 'generating');
+    if (pending.length === 0) {
+      setIsGeneratingAll(false);
+      return;
+    }
+
+    // Process in batches of 10 parallel chunks
+    const CHUNK_SIZE = 10;
+    const chunks = [];
+    for (let i = 0; i < pending.length; i += CHUNK_SIZE) {
+      chunks.push(pending.slice(i, i + CHUNK_SIZE));
+    }
+
+    // Mark all as generating immediately
+    setReplies(prev => prev.map(r => 
+      pending.some(p => p.id === r.id) ? { ...r, status: 'generating' } : r
+    ));
+
     try {
-      await Promise.all(pendingReplies.map(reply => generateReply(reply.id)));
+      // Process all chunks in parallel
+      await Promise.all(chunks.map(async (chunk) => {
+        try {
+          const results = await generateBatchTwitterReplies(
+            chunk.map(c => ({ id: c.id, url: c.originalUrl })),
+            settings.tone,
+            settings.length,
+            settings.customPrompt
+          );
+
+          setReplies(prev => prev.map(r => {
+            const match = results.find(res => res.id === r.id);
+            return match ? { ...r, generatedText: match.text, status: 'completed' } : r;
+          }));
+        } catch (err: any) {
+          setReplies(prev => prev.map(r => 
+            chunk.some(c => c.id === r.id) ? { ...r, status: 'error', error: err.message } : r
+          ));
+        }
+      }));
     } catch (e) {
       console.error("Batch processing error", e);
+    } finally {
+      setIsGeneratingAll(false);
     }
-    
-    setIsGeneratingAll(false);
   };
 
   const handleRemove = (id: string) => {
@@ -110,19 +140,17 @@ const App: React.FC = () => {
         <span className={`font-graffiti text-2xl lg:text-4xl brand-glow -ml-0.5 ${isDark ? 'text-white' : 'text-purple-900'}`}>arry</span>
       </div>
       <div className="flex items-baseline ml-1 mt-1">
-        <span className={`font-drip inline-block bg-clip-text text-transparent text-3xl lg:text-5xl ${isDark ? 'bg-gradient-to-b from-fuchsia-400 to-purple-600' : 'bg-gradient-to-b from-purple-600 to-purple-900'}`}>G</span>
-        <span className={`font-drip inline-block bg-clip-text text-transparent text-2xl lg:text-4xl -ml-1 ${isDark ? 'bg-gradient-to-b from-fuchsia-400 to-purple-600' : 'bg-gradient-to-b from-purple-700 to-purple-950'}`}>enius</span>
+        <span className={`font-drip inline-block bg-clip-text text-transparent text-3xl lg:text-5xl ${isDark ? 'bg-gradient-to-b from-fuchsia-400 to-purple-600' : 'bg-gradient-to-br from-purple-600 via-fuchsia-500 to-pink-600'}`}>G</span>
+        <span className={`font-drip inline-block bg-clip-text text-transparent text-2xl lg:text-4xl -ml-1 ${isDark ? 'bg-gradient-to-b from-fuchsia-400 to-purple-600' : 'bg-gradient-to-br from-purple-600 via-fuchsia-500 to-pink-600'}`}>enius</span>
       </div>
     </div>
   );
 
   return (
     <div className={`min-h-screen flex flex-col selection:bg-purple-500/30 selection:text-purple-200 transition-colors duration-500`}>
-      {/* Background Decor */}
       <div className="fixed top-[-10%] left-[-10%] w-[40%] h-[40%] bg-purple-900/10 blur-[120px] rounded-full -z-10"></div>
       <div className="fixed bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-fuchsia-900/10 blur-[120px] rounded-full -z-10"></div>
 
-      {/* Navbar */}
       <nav className={`sticky top-0 z-50 backdrop-blur-xl border-b px-6 py-4 transition-colors duration-300 ${isDark ? 'bg-[#030014]/60 border-white/5' : 'bg-white/60 border-purple-100'}`}>
         <div className="max-w-6xl mx-auto flex items-center justify-between">
           <div className="flex items-center">
@@ -139,7 +167,6 @@ const App: React.FC = () => {
       </nav>
 
       <main className="flex-grow max-w-6xl mx-auto w-full px-4 py-12 space-y-12">
-        {/* Top Section */}
         <div className="grid lg:grid-cols-12 gap-8 items-start">
           <div className="lg:col-span-8 space-y-6">
             <section className="glass-card rounded-2xl p-8 shadow-2xl relative">
@@ -179,7 +206,6 @@ const App: React.FC = () => {
           </div>
         </div>
 
-        {/* Replies Section */}
         {replies.length > 0 && (
           <div className="space-y-8 animate-in fade-in duration-1000">
             <div className={`flex items-center justify-between border-b pb-6 ${isDark ? 'border-white/5' : 'border-purple-200'}`}>
@@ -228,7 +254,6 @@ const App: React.FC = () => {
           </div>
         )}
 
-        {/* Empty State */}
         {replies.length === 0 && (
           <div className="flex flex-col items-center justify-center py-24 text-center space-y-6 animate-in zoom-in duration-1000">
             <div className={`w-24 h-24 rounded-[2.5rem] flex items-center justify-center border float-animation relative ${isDark ? 'bg-white/5 border-white/5' : 'bg-purple-50 border-purple-100'}`}>
