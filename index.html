@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -48,8 +49,6 @@
       .btn-purple-gradient {
         background: linear-gradient(135deg, #2e1065 0%, #4c1d95 50%, #701a75 100%);
       }
-      
-      @keyframes spin { to { transform: rotate(360deg); } }
     </style>
     <script>
       // Shim process.env for the browser to prevent crashes during SDK initialization
@@ -58,26 +57,19 @@
   <script type="importmap">
 {
   "imports": {
-    "react": "https://esm.sh/react@^19.2.3",
-    "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
-    "react/": "https://esm.sh/react@^19.2.3/",
     "@google/genai": "https://esm.sh/@google/genai@^1.38.0",
+    "@vitejs/plugin-react": "https://esm.sh/@vitejs/plugin-react@^5.1.2",
+    "react/": "https://esm.sh/react@^19.2.3/",
+    "react": "https://esm.sh/react@^19.2.3",
     "uuid": "https://esm.sh/uuid@^13.0.0",
     "vite": "https://esm.sh/vite@^7.3.1",
-    "@vitejs/plugin-react": "https://esm.sh/@vitejs/plugin-react@^5.1.2"
+    "react-dom/": "https://esm.sh/react-dom@^19.2.3/"
   }
 }
 </script>
 </head>
   <body>
-    <div id="root">
-      <div style="display: flex; height: 100vh; align-items: center; justify-content: center; background: #030014;">
-        <div style="text-align: center;">
-          <div style="width: 40px; height: 40px; border: 3px solid #7c3aed; border-top-color: transparent; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 20px;"></div>
-          <p style="color: #7c3aed; font-family: sans-serif; font-size: 14px; font-weight: bold; letter-spacing: 2px;">SYNCHRONIZING ARCHITECT...</p>
-        </div>
-      </div>
-    </div>
+    <div id="root"></div>
     <script type="module" src="./index.tsx"></script>
   </body>
 </html>
